@@ -1,0 +1,50 @@
+version: '3.4'
+
+services:
+  learnvocabulary:
+    image: ${DOCKER_REGISTRY-}learnvocabulary
+    build:
+      context: .
+      dockerfile: LearnVocabulary/Dockerfile
+
+  webapi:
+    api:
+      image: ${DOCKER_REGISTRY-}webapi
+      build:
+        context: .
+         dockerfile: WebAPI/Dockerfile
+      ports:
+            - "3003:8080"
+      depends_on:
+            - db
+
+    db:
+      image: "mcr.microsoft.com/azure-sql-edge"
+      cap_add: [ 'SYS_PTRACE' ]
+      ports:
+            - "1433:1433"
+      environment:
+            - "MSSQL_SA_PASSWORD=sql@#123"
+            - "ACCEPT_EULA=1"
+      hostname: mssql
+
+  coreservice:
+    api:
+      image: ${DOCKER_REGISTRY-}coreservice
+      build:
+        context: .
+         dockerfile: CoreService/Dockerfile
+      ports:
+            - "3002:8080"
+      depends_on:
+            - db
+
+    db:
+      image: "mcr.microsoft.com/azure-sql-edge"
+      cap_add: [ 'SYS_PTRACE' ]
+      ports:
+            - "1433:1433"
+      environment:
+            - "MSSQL_SA_PASSWORD=sql@#123"
+            - "ACCEPT_EULA=1"
+      hostname: mssql
